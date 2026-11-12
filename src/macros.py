@@ -18,4 +18,9 @@ class Square(Expr):
     child: Expr
     def size(self) -> int: return 1 + self.child.size()
 
-AVAILABLE_MACROS = [AddConst, MultConst, Square]
+@dataclass
+class Cube(Expr):
+    child: Expr
+    def size(self) -> int: return 1 + self.child.size()
+
+AVAILABLE_MACROS = [MultConst, AddConst, Square, Cube]
