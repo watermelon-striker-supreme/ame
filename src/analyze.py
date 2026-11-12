@@ -4,20 +4,16 @@ import numpy as np
 
 if __name__ == "__main__":
     files = glob.glob("data/result_*.json")
-    
     if not files:
-        print("No files found in data/. Either the jobs are still running, or every problem was rejected by the Goldilocks filter.")
+        print("No files found in data/.")
         exit()
 
-    times = [json.load(open(f))["time"] for f in files]
-    targets = [json.load(open(f))["target_ast"] for f in files]
+    fitness = [json.load(open(f))["fitness"] for f in files]
+    found_sizes = [json.load(open(f))["found_size"] for f in files]
     
-    print(f"=== GOLDILOCKS ANALYSIS ===")
-    print(f"Jobs that passed the filter: {len(files)} out of 100")
-    print(f"Average time of accepted jobs: {np.mean(times):.3f} seconds")
-    print(f"Fastest accepted: {min(times):.3f} seconds")
-    print(f"Slowest accepted: {max(times):.3f} seconds")
+    macro_usage = sum(1 for f in files if any(m in json.load(open(f))["found_ast"] for m in ["Macro_", "Square", "AddConst", "MultConst"]))
     
-    print("\n=== SAMPLE ACCEPTED TARGETS ===")
-    for t in targets[:5]:
-        print(t)
+    print(f"=== ANALYSIS OF {len(files)} JOBS ===")
+    print(f"Average Fitness: {np.mean(fitness):.2f}")
+    print(f"Average Found Size: {np.mean(found_sizes):.2f}")
+    print(f"Macro Usage: {macro_usage} out of {len(files)}")

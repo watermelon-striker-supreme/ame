@@ -1,26 +1,9 @@
 from dataclasses import dataclass
-from base import Expr, Literal
+from base import Expr, Literal, Input, Add, Multiply
 
-@dataclass
-class AddConst(Expr):
-    child: Expr
-    const: Literal
-    def size(self) -> int: return 1 + self.child.size()
+def get_literal(params, param_idx):
+    val = params[param_idx[0]]
+    param_idx[0] += 1
+    return val
 
-@dataclass
-class MultConst(Expr):
-    child: Expr
-    const: Literal
-    def size(self) -> int: return 1 + self.child.size()
-
-@dataclass
-class Square(Expr):
-    child: Expr
-    def size(self) -> int: return 1 + self.child.size()
-
-@dataclass
-class Cube(Expr):
-    child: Expr
-    def size(self) -> int: return 1 + self.child.size()
-
-AVAILABLE_MACROS = [MultConst, AddConst, Square, Cube]
+AVAILABLE_MACROS = []
