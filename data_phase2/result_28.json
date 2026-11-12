@@ -1,1 +1,0 @@
-{"job_id": 28, "target": "2x + -6", "ast": "AddConst(child=MultConst(child=Input(), const=Literal()), const=Literal())", "time": 0.6824862957000732}

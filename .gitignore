@@ -1,0 +1,6 @@
+__pycache__/
+*.json
+logs/
+data_phase1/
+data_phase2/
+miniconda3/
