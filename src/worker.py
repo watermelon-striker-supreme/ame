@@ -15,17 +15,16 @@ from macros import AVAILABLE_MACROS
 
 warnings.filterwarnings("ignore")
 
-def count_nodes(expr: Expr) -> int:
-    if isinstance(expr, (Input, Literal)): return 1
-    if type(expr).__name__ in [m.__name__ for m in AVAILABLE_MACROS]:
-        return 1 + count_nodes(expr.child)
-    return 1 + count_nodes(expr.left) + count_nodes(expr.right)
-
 def count_literals(expr: Expr) -> int:
     if isinstance(expr, Literal): return 1
     if isinstance(expr, Input): return 0
-    if type(expr).__name__ in [m.__name__ for m in AVAILABLE_MACROS]: 
-        return count_literals(expr.child) + 1
+    
+    expr_name = type(expr).__name__
+    if expr_name in ["AddConst", "MultConst"]:
+        return count_literals(expr.child) + count_literals(expr.const)
+    if expr_name == "Square":
+        return count_literals(expr.child)
+        
     return count_literals(expr.left) + count_literals(expr.right)
 
 def evaluate_tree(expr: Expr, x: float, params: list, param_idx: list) -> float:
@@ -42,7 +41,10 @@ def evaluate_tree(expr: Expr, x: float, params: list, param_idx: list) -> float:
         return evaluate_tree(expr.child, x, params, param_idx) + evaluate_tree(expr.const, x, params, param_idx)
     elif expr_name == "MultConst":
         return evaluate_tree(expr.child, x, params, param_idx) * evaluate_tree(expr.const, x, params, param_idx)
-    
+    elif expr_name == "Square":
+        val = evaluate_tree(expr.child, x, params, param_idx)
+        return val * val
+        
     raise ValueError(f"Unknown expression type: {expr_name}")
 
 def fitness_function(expr: Expr, data) -> float:
@@ -74,7 +76,7 @@ def fitness_function(expr: Expr, data) -> float:
             if total_error > 1000: return 1000000
         except Exception: return 1000000
             
-    return total_error + (count_nodes(expr) * 0.5)
+    return total_error + (expr.size() * 0.5)
 
 if __name__ == "__main__":
     job_id = int(sys.argv[1])
@@ -82,10 +84,11 @@ if __name__ == "__main__":
     
     a = random.randint(2, 8)
     b = random.randint(-10, 10)
-    data = [(x, a * x + b) for x in range(1, 6)]
+    c = random.randint(-5, 5)
+    data = [(x, a * x**2 + b * x + c) for x in range(1, 6)]
     
-    grammar = extract_grammar([Input, Literal, Add, Multiply] + AVAILABLE_MACROS, Expr)
-    
+    grammar = extract_grammar([Input, Literal] + AVAILABLE_MACROS, Expr)
+        
     start_time = time.time()
     alg = SimpleGP(
         grammar=grammar,
@@ -100,7 +103,7 @@ if __name__ == "__main__":
     actual_expr = best_individuals[0].get_phenotype()
     duration = time.time() - start_time
     
-    result = {"job_id": job_id, "target": f"{a}x + {b}", "ast": str(actual_expr), "time": duration}
+    result = {"job_id": job_id, "target": f"{a}x^2 + {b}x + {c}", "ast": str(actual_expr), "time": duration}
     
     with open(f"data/result_{job_id}.json", "w") as f:
         json.dump(result, f)
