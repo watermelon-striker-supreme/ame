@@ -1,0 +1,1 @@
+{"job_id": 81, "target": "6x + 4", "ast": "Add(left=Literal(), right=Multiply(left=Input(), right=Literal()))", "time": 0.656050443649292}
